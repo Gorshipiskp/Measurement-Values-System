@@ -48,8 +48,8 @@ class MathValue:
         return MathValue(new_val, exp * base_exponent, self.content[2].units)
 
     def _check_(self, other: "MathValue") -> None:
-        if self.content[2] != other.content[2]:
-            raise ValueError("При сравнении возникла ошибка - Несовпадение единиц измерения")
+        assert self.content[2] == other.content[2], ("An error occurred during the operation - A mismatch of "
+                                                     "measurement units", 1, "MathValueTypeError")
 
     def __str__(self) -> str:
         if self.content[1] == 0:
@@ -92,8 +92,8 @@ class MathValue:
         return MathValue(other / self.content[0], self.content[1], self.content[2].units)
 
     def __pow__(self, exponent) -> "MathValue":  # exponent: "MathValue" | int | float
-        if not isinstance(exponent, int | float):
-            raise ValueError("Экспонента для возведения MathValue в степень должна быть числом")
+        assert isinstance(exponent, int | float), ("The exponent for exponentiation of Math Value must be a number",
+                                                   2, "ExponentTypeError")
 
         new_val = self.content[0] ** exponent
         new_exp = self.content[1] * exponent
@@ -133,7 +133,7 @@ class MathValue:
         return MathValue(round(self.rawcalc(), n), 0, self.content[2].units)
 
 
-a = MathValue(3, 2, Вт=1)
-b = MathValue(1, 2, Вт=2)
+a = MathValue(2, 1, Вт=2)
+b = MathValue(2, 1, Вт=1)
 
-print(a / b)
+print(a + b)

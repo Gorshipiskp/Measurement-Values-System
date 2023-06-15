@@ -1,8 +1,7 @@
 def gexp(num: float | int, expnum: bool = True, sepbase: int = 1) -> int | tuple[float, int]:
     exp = 0
 
-    if sepbase <= 0:
-        raise ValueError('Степень десяти не может быть меньше или равна нулю')
+    assert sepbase > 0, ('The power of ten cannot be less than or equal to zero', 3, "")
 
     while abs(num) >= 10 ** sepbase:
         num /= 10 ** sepbase
