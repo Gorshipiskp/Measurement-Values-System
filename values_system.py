@@ -1,5 +1,5 @@
 from units_system import Unit
-from math_utils import gexp
+from math_utils import gexp, rndint
 
 
 base_exponent = 1
@@ -7,10 +7,16 @@ base_exponent = 1
 
 class MathValue:
     def __init__(self, value: float | int, exp: float | int = 0, sc: dict = None, **sc_: int | float):
-        if exp == 0:
-            self.content = (*gexp(value, sepbase=base_exponent), Unit(sc | sc_ if sc else sc_))
+        if isinstance(sc, Unit):
+            newunit = sc
+
         else:
-            self.content = (value, exp, Unit(sc | sc_ if sc else sc_))
+            newunit = Unit(sc | sc_ if sc else sc_)
+
+        if exp == 0:
+            self.content = (*gexp(value, sepbase=base_exponent), newunit)
+        else:
+            self.content = (value, exp, newunit)
 
     @property
     def content(self):
@@ -51,11 +57,9 @@ class MathValue:
         elif self.content[1] == 1:
             expon = f' * {10 ** base_exponent}'
         else:
-            expon = f" * {10 ** base_exponent} ** {self.content[1] / base_exponent}"
+            expon = f" * {10 ** base_exponent} ** {rndint(self.content[1] / base_exponent)}"
 
-        sc = f" {self.content[2]}" if not self.content[2] is None else ""
-
-        return f"{self.content[0]}{expon}{sc}"
+        return f"{rndint(self.content[0])}{expon}{f' {self.content[2]}' if not self.content[2] is None else ''}"
 
     def __sub__(self, other: "MathValue") -> "MathValue":
         return self._perform_operation_(other, False)
@@ -89,8 +93,7 @@ class MathValue:
 
     def __pow__(self, exponent) -> "MathValue":  # exponent: "MathValue" | int | float
         if not isinstance(exponent, int | float):
-            self._check_(exponent)
-            exponent = exponent.rawcalc()
+            raise ValueError("Экспонента для возведения MathValue в степень должна быть числом")
 
         new_val = self.content[0] ** exponent
         new_exp = self.content[1] * exponent
@@ -128,3 +131,9 @@ class MathValue:
 
     def __round__(self, n=None) -> "MathValue":
         return MathValue(round(self.rawcalc(), n), 0, self.content[2].units)
+
+
+a = MathValue(3, 2, Вт=1)
+b = MathValue(1, 2, Вт=2)
+
+print(a / b)
