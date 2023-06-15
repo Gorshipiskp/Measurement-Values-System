@@ -131,9 +131,3 @@ class MathValue:
 
     def __round__(self, n=None) -> "MathValue":
         return MathValue(round(self.rawcalc(), n), 0, self.content[2].units)
-
-
-a = MathValue(2, 1, Вт=2)
-b = MathValue(2, 1, Вт=1)
-
-print(a + b)
