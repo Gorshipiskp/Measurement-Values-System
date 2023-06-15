@@ -31,7 +31,7 @@ class MathValue:
         gexp_ = gexp(self.rawcalc(), sepbase=base_exponent)
         self._content = (gexp_[0], gexp_[1] * base_exponent, Unit(self.content[2].units))
 
-    def rawcalc(self):
+    def rawcalc(self) -> int | float:
         return self.content[0] * 10 ** self.content[1]
 
     def calc(self):
