@@ -21,10 +21,14 @@ class Unit:
         units = []
 
         for cur_id, (char, val) in enumerate(self.units.items()):
-            if cur_id > 0:
+            if cur_id == 0:
+                if val == 1:
+                    units.append(char)
+                else:
+                    units.append(f"{char}{f' ** {val}' if val != 1 else ''}")
+            else:
                 units.append("*" if val > 0 else "/")
-
-            units.append(f"{char}{f' ** {abs(val)}' if abs(val) != 1 else ''}")
+                units.append(f"{char}{f' ** {abs(val)}' if abs(val) != 1 else ''}")
         return " ".join(units)
 
     def __mul__(self, other: "Unit") -> "Unit":

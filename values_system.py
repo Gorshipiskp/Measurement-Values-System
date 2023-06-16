@@ -6,17 +6,17 @@ base_exponent = 1
 
 
 class MathValue:
-    def __init__(self, value: float | int, exp: float | int = 0, sc: dict = None, **sc_: int | float):
+    def __init__(self, value: float | int, exp: float | int = 0, sc: dict | Unit = None, **sc_: int | float):
         if isinstance(sc, Unit):
-            newunit = sc
-
+            newunit: Unit = sc
         else:
-            newunit = Unit(sc | sc_ if sc else sc_)
+            newunit: Unit = Unit(sc | sc_ if sc else sc_)
 
         if exp == 0:
-            self.content = (*gexp(value, sepbase=base_exponent), newunit)
+            value, exp = gexp(value, sepbase=base_exponent)
+            self.content: tuple[int | float, int, Unit] = (value, exp, newunit)
         else:
-            self.content = (value, exp, newunit)
+            self.content: tuple[int | float, int, Unit] = (value, exp, newunit)
 
     @property
     def content(self):
@@ -61,11 +61,14 @@ class MathValue:
 
         return f"{rndint(self.content[0])}{expon}{f' {self.content[2]}' if not self.content[2] is None else ''}"
 
-    def __sub__(self, other: "MathValue") -> "MathValue":
-        return self._perform_operation_(other, False)
+    def __round__(self, n=None) -> "MathValue":
+        return MathValue(round(self.rawcalc(), n), 0, self.content[2].units)
 
     def __add__(self, other: "MathValue") -> "MathValue":
         return self._perform_operation_(other, True)
+
+    def __sub__(self, other: "MathValue") -> "MathValue":
+        return self._perform_operation_(other, False)
 
     def __mul__(self, other) -> "MathValue":  # other: "MathValue" | int | float
         if isinstance(other, int | float):
@@ -128,6 +131,3 @@ class MathValue:
     def __ge__(self, other: "MathValue") -> bool:
         self._check_(other)
         return self.rawcalc() >= other.rawcalc()
-
-    def __round__(self, n=None) -> "MathValue":
-        return MathValue(round(self.rawcalc(), n), 0, self.content[2].units)

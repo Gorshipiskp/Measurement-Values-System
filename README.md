@@ -2,11 +2,56 @@
 
 A convenient program for performing arithmetic operations on numbers with units of measurement and exponents. It can be useful for engineers (for efficient and convenient operation on such numbers). In any case, while this program is in beta testing.
 
-#### _The information is current on the 7th commit_
+#### _The information is current on the 8th commit_
 
----
+
+Usage examples:
+
+```
+a = MathValue(3, 1, W=1)
+b = MathValue(1.5, 2, W=1)
+c = MathValue(2, 2, cm=2)
+d = MathValue(3, 1, s=-1)
+
+f = a * b / c / d
+print(f)  # 0.75 W ** 2 * s / cm ** 2
+```
+
+Explanation:
+
+First, let's calculate the numerical values:
+
+```
+#  a = 3 * 10 ** 1, 
+#  because MathValue(value, exponent_of_ten, units_of_measurement)
+#  a = value * 10 ** exponent_of_ten
+
+a * b / c / d  ==  (3 * 10 ** 1) * (1.5 * 10 ** 2) / (2 * 10 ** 2) / (3 * 10 ** 1)  ==  30 * 150 / 200 / 30 == 0.75
+```
+
+As we can see, the numerical value is correct, now we need to find out the unit of measurement:
+
+```
+# d = s ** -1,
+# but the expression a / s ** -1 = a * s is also true
+# since we change the sign, and then the operands
+# that is why if there are several units of measurement, then the first one will always be with a positive degree (if there is one)
+
+a * b / c / d  ==  W * W / cm ** 2 / s ** -1  ==  W ** 2 / cm ** 2 * s
+
+Sort by sign (multiplication - first, division - second):
+
+W ** 2 * s / cm ** 2
+```
+
+We connect the resulting:
+
+`0.75 W ** 2 * s / cm ** 2`
+
+The answer calculated manually converged with the answer calculated by the computer
 
 ## Explanation of the code:
+
 
 ## `units_system.py`:
 
@@ -65,7 +110,7 @@ File `values_system.py` contains the definition of the `MathValue` class, which 
 
 The `MathValue` class has the following methods and functions:
 
-`__init__(self, value: float | int, exp: float | int = 0, sc: dict = None, **sc_: int | float)`: Constructor of the `MathValue` class. Accepts a numeric value `value` (type can be `float` or `int`), an exponent `exp` (type can be `float` or `int`, default `0`), a dictionary `sc` and named arguments `sc`_ (which also represent a `dictionary` of units of measurement).'
+`__init__(self, value: float | int, exp: float | int = 0, sc: dict | Unit = None, **sc_: int | float)`: Constructor of the `MathValue` class. Accepts a numeric value `value` (type can be `float` or `int`), an exponent `exp` (type can be `float` or `int`, default `0`), a dictionary `sc` and named arguments `sc`_ (which also represent a `dictionary` of units of measurement).'
 
 `content`: A property that provides access to the contents of the `MathValue` object.
 
@@ -88,3 +133,14 @@ Methods of overloading arithmetic operators (`__sub__`, `__add__`, `__mul__`, `_
 Methods for overloading comparison operators (`__eq__`, `__ne__`, `__lt__`, `__le__`, `__gt__`, `__ge__`) for comparing `MathValue` objects.
 
 `__round__(self, n=None) -> "MathValue"`: Overloaded number rounding method.
+
+---
+
+##  Errors' code
+
+### `1 – MathValueTypeError` 
+Called when you are trying to perform an operation on two non-equatable MathValues, for example when you are trying to add two MathValues with different units of measurement
+### `2 – ExponentTypeError` 
+ Called when you try to raise MathValue to a non-numeric power
+### `3 – TenPowerError` 
+Called when you try to run the gexp function (from math_utils.py) with the sepbase parameter less than or equal to zero

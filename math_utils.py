@@ -1,5 +1,5 @@
 def gexp(num: float | int, expnum: bool = True, sepbase: int = 1) -> int | tuple[float, int]:
-    exp = 0
+    exp: int = 0
 
     assert sepbase > 0, ('The power of ten cannot be less than or equal to zero', 3, "")
 
