@@ -2,7 +2,7 @@
 
 A convenient program for performing arithmetic operations on numbers with units of measurement and exponents. It can be useful for engineers who need to efficiently and conveniently work with such numbers. Please note that the program is currently in beta testing.
 
-#### _Information is current as of the 9th commit_
+#### _Information is current as of the 10th commit_
 
 ---
 
@@ -66,9 +66,7 @@ The `Unit` class provides the following methods and functionality:
 - `update_units(self, other: "Unit", add: bool = True) -> "Unit"`: Updates the units of the current `Unit` object by adding or subtracting units from another `Unit` object based on the `add` parameter. Returns a new `Unit` object with the updated units of measurement.
 - `_clean_(self) -> None`: Removes zero-valued units of measurement and sorts them in descending order of exponents.
 - `__str__(self) -> str`: Returns a string representation of the `Unit` object. If the object contains only one unit of measurement with a negative exponent, it returns a string in the format `"unit_of_measurement ** exponent_"`. Otherwise, it returns a string consisting of units of measurement and their exponents separated by multiplication and division signs.
-- Methods for overloaded
-
- arithmetic operators (`__mul__`, `__truediv__`, `__pow__`) to perform multiplication, division, and exponentiation.
+- Methods for overloaded arithmetic operators (`__mul__`, `__truediv__`, `__pow__`) to perform multiplication, division, and exponentiation.
 - Methods for overloaded comparison operators (`__eq__`, `__ne__`) to compare `Unit` objects.
 - Methods for overloaded unary operators (`__neg__`) for negation.
 
