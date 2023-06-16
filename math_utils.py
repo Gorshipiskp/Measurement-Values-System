@@ -9,7 +9,7 @@ def gexp(num: float | int, expnum: bool = True, sepbase: int = 1) -> int | tuple
     return (num, exp) if expnum else exp
 
 
-def rndint(num: float | int, accuracy: int = 13) -> int | float:
+def rndint(num: float | int, accuracy: int = 12) -> int | float:
     if abs(int(num) - num) < 10 ** -accuracy:
         return int(num)
     return num

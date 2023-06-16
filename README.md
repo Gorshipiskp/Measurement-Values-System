@@ -2,6 +2,8 @@
 
 A convenient program for performing arithmetic operations on numbers with units of measurement and exponents. It can be useful for engineers (for efficient and convenient operation on such numbers). In any case, while this program is in beta testing.
 
+#### _The information is current on the 7th commit_
+
 ---
 
 ## Explanation of the code:
@@ -47,9 +49,9 @@ Accepts the number `num`, whose type can be `float` or `int`, as well as the par
 The function calculates the exponent of the number `num` relative to the specified `sepbase` bit depth. In this case, the number `num` is divided by 10 to the power of `sepbase` as long as its absolute value is greater than or equal to 10 to the power of `sepbase`.
 Either only the exponent as an `integer` is returned, or a `tuple` of `num` and exponents, depending on the value of the `expnum` parameter.
 
-`rndint(num: float | int, accuracy: int = 13)`:
+`rndint(num: float | int, accuracy: int = 12)`:
 
-Accepts the number `num`, the type of which can be `float` or `int`, as well as the `accuracy` parameter (an `integer`, by default `13`).
+Accepts the number `num`, the type of which can be `float` or `int`, as well as the `accuracy` parameter (an `integer`, by default `12`).
 `num` is the number that needs to be rounded.
 `accuracy` determines the accuracy of rounding.
 The function rounds the number `num` and returns the result. If the difference between the integer part of the number `num` and the number `num` itself is less than 10 to the inverse of the specified accuracy, then the integer part of the number `num` is returned, otherwise the number `num` itself is returned.
