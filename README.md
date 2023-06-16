@@ -1,13 +1,14 @@
 # Measurement-Values-System
 
-A convenient program for performing arithmetic operations on numbers with units of measurement and exponents. It can be useful for engineers (for efficient and convenient operation on such numbers). In any case, while this program is in beta testing.
+A convenient program for performing arithmetic operations on numbers with units of measurement and exponents. It can be useful for engineers who need to efficiently and conveniently work with such numbers. Please note that the program is currently in beta testing.
 
-#### _The information is current on the 8th commit_
+#### _Information is current as of the 9th commit_
 
+---
 
-Usage examples:
+## Usage examples:
 
-```
+``` python
 a = MathValue(3, 1, W=1)
 b = MathValue(1.5, 2, W=1)
 c = MathValue(2, 2, cm=2)
@@ -17,38 +18,40 @@ f = a * b / c / d
 print(f)  # 0.75 W ** 2 * s / cm ** 2
 ```
 
-Explanation:
+## Explanation:
 
 First, let's calculate the numerical values:
 
-```
-#  a = 3 * 10 ** 1, 
-#  because MathValue(value, exponent_of_ten, units_of_measurement)
-#  a = value * 10 ** exponent_of_ten
+``` python
+# a = 3 * 10 ** 1,
+# because MathValue(value, exponent_of_ten, units_of_measurement)
+# a = value * 10 ** exponent_of_ten
 
-a * b / c / d  ==  (3 * 10 ** 1) * (1.5 * 10 ** 2) / (2 * 10 ** 2) / (3 * 10 ** 1)  ==  30 * 150 / 200 / 30 == 0.75
+a * b / c / d == (3 * 10 ** 1) * (1.5 * 10 ** 2) / (2 * 10 ** 2) / (3 * 10 ** 1) == 30 * 150 / 200 / 30 == 0.75
 ```
 
-As we can see, the numerical value is correct, now we need to find out the unit of measurement:
+As we can see, the numerical value is correct. Now let's determine the units of measurement:
 
-```
+``` python
 # d = s ** -1,
 # but the expression a / s ** -1 = a * s is also true
-# since we change the sign, and then the operands
-# that is why if there are several units of measurement, then the first one will always be with a positive degree (if there is one)
+# since we change the sign and then the operands
+# that is why if there are several units of measurement, the first one will always have a positive exponent (if there is one)
 
-a * b / c / d  ==  W * W / cm ** 2 / s ** -1  ==  W ** 2 / cm ** 2 * s
+a * b / c / d == W * W / cm ** 2 / s ** -1 == W ** 2 / cm ** 2 * s
 
-Sort by sign (multiplication - first, division - second):
+# Sort by sign (multiplication - first, division - second):
 
 W ** 2 * s / cm ** 2
 ```
 
-We connect the resulting:
+Putting it all together:
 
 `0.75 W ** 2 * s / cm ** 2`
 
-The answer calculated manually converged with the answer calculated by the computer
+The answer calculated manually matches the answer calculated by the program.
+
+---
 
 ## Explanation of the code:
 
@@ -57,90 +60,53 @@ The answer calculated manually converged with the answer calculated by the compu
 
 **File `units_system.py` contains the definition of the `Unit` class, which represents a system of units of measurement and provides arithmetic operations with these units.**
 
-The `Unit` class has the following methods and functionality:
+The `Unit` class provides the following methods and functionality:
 
-`__init__(self, units: dict[str, int] = None, **units_: int)`: Constructor of the `Unit` class. Accepts the units dictionary and/or a variable number of units_ arguments representing units of measurement and their exponents. Creates a `Unit` object with the specified units of measurement.
+- `__init__(self, units: dict[str, int] = None, **units_: int)`: Constructor of the `Unit` class. Accepts a dictionary of units (`units`) and/or a variable number of keyword arguments (`units_`) representing units of measurement and their exponents. Creates a `Unit` object with the specified units of measurement.
+- `update_units(self, other: "Unit", add: bool = True) -> "Unit"`: Updates the units of the current `Unit` object by adding or subtracting units from another `Unit` object based on the `add` parameter. Returns a new `Unit` object with the updated units of measurement.
+- `_clean_(self) -> None`: Removes zero-valued units of measurement and sorts them in descending order of exponents.
+- `__str__(self) -> str`: Returns a string representation of the `Unit` object. If the object contains only one unit of measurement with a negative exponent, it returns a string in the format `"unit_of_measurement ** exponent_"`. Otherwise, it returns a string consisting of units of measurement and their exponents separated by multiplication and division signs.
+- Methods for overloaded
 
-`update_units(self, other: "Unit", add: bool = True) -> "Unit"`: Updates the units of the current `Unit` object by adding or subtracting units from another `Unit` object depending on the value of the add parameter. Returns a new `Unit` object with updated units of measurement.
-
-`_clean_(self) -> None`: Removes zero values of units of measurement and sorts them in descending order of exponents.
-
-`__str__(self) -> str`: Returns a string representation of the `Unit` object. If the object contains only one unit of measurement with a negative exponent, a string is returned in the format `"unit_of_measurement ** exponent_"`. In other cases, a string consisting of units of measurement and their exponents separated by multiplication and division signs is returned.
-
-`__mul__(self, other: "Unit") -> "Unit"`: Overloaded multiplication operator. Combines the units of measurement of the current `Unit` object with the units of measurement of another `Unit` object. Returns a new `Unit` object with the combined units of measurement.
-
-`__truediv__(self, other: "Unit") -> "Unit"`: Overloaded division operator. Divides the units of the current `Unit` object into units of another `Unit` object. Returns a new `Unit` object with separated units of measurement.
-
-`__pow__(self, power, modulo=None) -> "Unit"`: Overloaded exponentiation operator. Raises the units of the current `Unit` object to the specified power degree. Returns a new `Unit` object with units of measurement raised to a power.
-
-`__eq__(self, other: "Unit") -> bool`: Overloaded equality operator. Compares the units of measurement of the current `Unit` object with the units of measurement of another `Unit` object. Returns True if they are equal, and False otherwise.
-
-`__ne__(self, other: "Unit") -> bool:` Overloaded inequality operator. Compares the units of measurement of the current `Unit` object with the units of measurement of another `Unit` object. Returns True if they are not equal, and False otherwise.
-
-`__neg__(self) -> "Unit"`: Overloaded negation operator. Returns a new `Unit` object with units of measurement in which the exponents have been changed to opposite values.
-
----
+ arithmetic operators (`__mul__`, `__truediv__`, `__pow__`) to perform multiplication, division, and exponentiation.
+- Methods for overloaded comparison operators (`__eq__`, `__ne__`) to compare `Unit` objects.
+- Methods for overloaded unary operators (`__neg__`) for negation.
 
 ## `math_utils.py`:
 
 **File `math_utils.py` contains two functions: `gexp` and `rndint`, designed for performing mathematical operations and rounding numbers.**
 
-`gexp(num: float | int, expnum: bool = True, sepbase: int = 1) -> int | tuple[float, int]`:
-
-Accepts the number `num`, whose type can be `float` or `int`, as well as the parameters `expnum` (boolean `value`, by default `True`) and `sepbase` (`integer`, by default `1`).
-`num` is a number for which the exponent of ten is calculated.
-`expnum` determines whether to return the result as a `tuple` of the number `num` and the exponent, or only the exponent.
-`sepbase` indicates the bit depth by which the number should be divided to calculate the exponent.
-The function calculates the exponent of the number `num` relative to the specified `sepbase` bit depth. In this case, the number `num` is divided by 10 to the power of `sepbase` as long as its absolute value is greater than or equal to 10 to the power of `sepbase`.
-Either only the exponent as an `integer` is returned, or a `tuple` of `num` and exponents, depending on the value of the `expnum` parameter.
-
-`rndint(num: float | int, accuracy: int = 12)`:
-
-Accepts the number `num`, the type of which can be `float` or `int`, as well as the `accuracy` parameter (an `integer`, by default `12`).
-`num` is the number that needs to be rounded.
-`accuracy` determines the accuracy of rounding.
-The function rounds the number `num` and returns the result. If the difference between the integer part of the number `num` and the number `num` itself is less than 10 to the inverse of the specified accuracy, then the integer part of the number `num` is returned, otherwise the number `num` itself is returned.
-
----
+- `gexp(num: float | int, expnum: bool = True, sepbase: int = 1) -> int | tuple[float, int]`: Accepts a number (`num`) of type `float` or `int`, along with optional parameters `expnum` (a boolean indicating whether to return the result as a tuple of the number `num` and the exponent) and `sepbase` (an integer indicating the bit depth by which the number should be divided to calculate the exponent). The function calculates the exponent of the number `num` relative to the specified `sepbase` bit depth. It returns either only the exponent as an integer or a tuple of `num` and the exponent, depending on the `expnum` parameter.
+- `rndint(num: float | int, accuracy: int = 12)`: Accepts a number (`num`) of type `float` or `int`, along with an optional `accuracy` parameter (an integer indicating the accuracy of rounding). The function rounds the number `num` and returns the result. If the difference between the integer part of `num` and `num` itself is less than 10 to the power of the inverse of the specified accuracy, the integer part is returned. Otherwise, `num` itself is returned.
 
 ## `values_system.py`:
 
+**File `values_system.py` contains the definition of the `MathValue` class, which represents numeric values with units of measurement and allows various arithmetic operations to be performed on them.**
 
-File `values_system.py` contains the definition of the `MathValue` class, which represents numeric values with units of measurement and allows you to perform various arithmetic operations on them.
+The `MathValue` class provides the following methods and functionality:
 
-The `MathValue` class has the following methods and functions:
-
-`__init__(self, value: float | int, exp: float | int = 0, sc: dict | Unit = None, **sc_: int | float)`: Constructor of the `MathValue` class. Accepts a numeric value `value` (type can be `float` or `int`), an exponent `exp` (type can be `float` or `int`, default `0`), a dictionary `sc` and named arguments `sc`_ (which also represent a `dictionary` of units of measurement).'
-
-`content`: A property that provides access to the contents of the `MathValue` object.
-
-`_content`: A private `property` that stores the contents of the `MathValue` object.
-
-`_gexp_()`: A private method that calculates the exponent of a number and updates the contents of the `MathValue` object.
-
-`rawcalc(self) -> int | float`: A method that calculates a numeric value without an exponent.
-
-`calc(self)`: A method that returns a new `MathValue` object with a numeric value without an exponent.
-
-`_perform_operation_(self, other: "MathValue", add: bool) -> "MathValue"`: A private method that performs an addition or subtraction operation between two `MathValue` objects.
-
-`_check_(self, other: "MathValue") -> None`: A private method that checks the correspondence of the units of measurement of two `MathValue` objects before performing the operation.
-
-`__str__(self) -> str`: An overloaded method for converting a `MathValue` object to a `string`.
-
-Methods of overloading arithmetic operators (`__sub__`, `__add__`, `__mul__`, `__rmul__`, `__truediv__`, `__rtruediv__`, `__pow__`, `__neg__`) for performing subtraction, addition, multiplication, division and exponentiation.
-
-Methods for overloading comparison operators (`__eq__`, `__ne__`, `__lt__`, `__le__`, `__gt__`, `__ge__`) for comparing `MathValue` objects.
-
-`__round__(self, n=None) -> "MathValue"`: Overloaded number rounding method.
+- `__init__(self, value: float | int, exp: float | int = 0, sc: dict | Unit = None, **sc_: int | float)`: Constructor of the `MathValue` class. Accepts a numeric value (`value`) of type `float` or `int`, an exponent (`exp`) of type `float` or `int` (default is `0`), a `sc` dictionary, and named arguments (`sc_`) representing units of measurement and their exponents.
+- `content`: A property that provides access to the contents of the `MathValue` object.
+- `_content`: A private property that stores the contents of the `MathValue` object.
+- `_gexp_()`: A private method that calculates the exponent of a number and updates the contents of the `MathValue` object.
+- `rawcalc(self) -> int | float`: A method that calculates the numeric value without the exponent.
+- `calc(self)`: A method that returns a new `MathValue` object with the numeric value without the exponent.
+- `_perform_operation_(self, other: "MathValue", add: bool) -> "MathValue"`: A private method that performs addition or subtraction operations between two `MathValue` objects.
+- `_check_(self, other: "MathValue") -> None`: A private method that checks the correspondence of the units of measurement of two `MathValue` objects before performing an operation.
+- `__str__(self) -> str`: An overloaded method that converts a `MathValue` object to a string.
+- Methods for overloading arithmetic operators (`__sub__`, `__add__`, `__mul__`, `__truediv__`, `__pow__`, `__neg__`) to perform subtraction, addition, multiplication, division, exponentiation, and negation.
+- Methods for overloading comparison operators (`__eq__`, `__ne__`, `__lt__`, `__le__`, `__gt__`, `__ge__`) to compare `MathValue` objects.
+- `__round__(self, n=None) -> "MathValue"`: An overloaded method for rounding a `MathValue` object.
 
 ---
 
-##  Errors' code
+## Errors' code
 
-### `1 – MathValueTypeError` 
-Called when you are trying to perform an operation on two non-equatable MathValues, for example when you are trying to add two MathValues with different units of measurement
-### `2 – ExponentTypeError` 
- Called when you try to raise MathValue to a non-numeric power
-### `3 – TenPowerError` 
-Called when you try to run the gexp function (from math_utils.py) with the sepbase parameter less than or equal to zero
+### `1 – MathValueTypeError`
+This error is raised when attempting to perform an operation on two non-equatable `MathValue` objects, such as adding two `MathValue` objects with different units of measurement.
+
+### `2 – ExponentTypeError`
+This error is raised when attempting to raise a `MathValue` to a non-numeric power.
+
+### `3 – TenPowerError`
+This error is raised when attempting to run the `gexp` function (from `math_utils.py`) with a `sepbase` parameter less than or equal to zero.
