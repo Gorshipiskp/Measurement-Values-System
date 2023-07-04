@@ -1,12 +1,16 @@
 from units_system import Unit
 from math_utils import gexp, rndint
+from typing import SupportsRound
 
 
 base_exponent = 1
 
 
-class MathValue:
+class MathValue(SupportsRound):
     def __init__(self, value: float | int, exp: float | int = 0, sc: dict | Unit = None, **sc_: int | float):
+        if isinstance(value, MathValue):
+            value = value.rawcalc()
+
         if isinstance(sc, Unit):
             newunit: Unit = sc
         else:

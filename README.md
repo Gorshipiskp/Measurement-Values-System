@@ -1,12 +1,12 @@
 # Measurement-Values-System
 
-A convenient program for performing arithmetic operations on numbers with units of measurement and exponents. It can be useful for engineers who need to efficiently and conveniently work with such numbers. Please note that the program is currently in beta testing.
+A convenient library written in Python for performing arithmetic operations with numbers with units of measurement and exponents. This can be useful for engineers who need to work efficiently and conveniently with such numbers.
 
 #### _Information is current as of the 10th commit_
 
 ---
 
-## Usage examples:
+# Usage examples:
 
 ``` python
 a = MathValue(3, 1, W=1)
@@ -40,7 +40,7 @@ As we can see, the numerical value is correct. Now let's determine the units of 
 
 a * b / c / d == W * W / cm ** 2 / s ** -1 == W ** 2 / cm ** 2 * s
 
-# Sort by sign (multiplication - first, division - second):
+# Sorting by sign (multiplication first, then division)::
 
 W ** 2 * s / cm ** 2
 ```
@@ -53,7 +53,76 @@ The answer calculated manually matches the answer calculated by the program.
 
 ---
 
-## Explanation of the code:
+# A few examples* of work:
+
+#### Imagine that we have several problems in physics, and we need to solve them according to the given formulas.
+
+1. #### Determine the weight of a person weighing 70 kg in an elevator descending equidistant with an acceleration of 1 m / s2.
+
+```python
+from values_system import MathValue
+
+P = lambda m, g, a: m * (a + g)
+
+m = MathValue(7, 1, kg=1)  # 70 kg
+a = MathValue(1, 0, m=1, s=-2)  # 1 m / s ** 2
+g = MathValue(9.8, 0, m=1, s=-2)  # 9.8 m / s ** 2
+
+print(P(m, g, a))  # 7.56 * 10 ** 2 kg * m / s ** 2
+```
+
+The force is measured in Newtons (`N`). The program gave out `kg * m / s ** 2`. The fact is that Newton (`N`) is expressed as `kg * m / s ** 2`
+
+`N = kg * m / s ** 2`
+
+**Finally, answer:** `7.7 * 10 ** 2 N` (`770 N`)
+
+2. #### The 2.8 kg rifle is suspended horizontally on two parallel threads. To what height from the initial position will the rifle be deflated when fired, if a bullet weighing 10 g flew out of it at a speed of 648 km/h?
+
+```python
+from values_system import MathValue
+
+to_mpersec = lambda v: MathValue(v.rawcalc() / 3.6, 0, m=1, s=-1)
+h = lambda m, v, g, M: m ** 2 * v ** 2 / (2 * g * M ** 2)
+
+M = MathValue(2.8, 0, kg=1)  # 2.8 kg
+m = MathValue(10, -3, kg=1)  # 0.01 kg = 10 g
+v = MathValue(6.48, 2, km=1, h=-1)  # 648 km/h
+g = MathValue(9.8, 0, m=1, s=-2)  # 9.8 m / s ** 2
+
+v = to_mpersec(v)  # Converting into km/s
+
+print(round(h(m, v, g, M), 3))  # 0.021 m
+```
+
+**Finally, answer:** `0.021 m`
+
+3. #### A body weighing 500 g slides off a loose slide (wedge) weighing 1 kg. The slope angle of the slide varies and is zero at the base. The height of the slide is 0.5 m. Determine the speed of the body after slipping. To neglect friction.
+
+```python
+from values_system import MathValue
+
+v = lambda M, g, h, m: (2 * M * g * h / (M + m)) ** 0.5
+to_kmperhour = lambda v: MathValue(v * 3.6, 0, km=1, h=-1)
+
+M = MathValue(1, 0, kg=1)  # 1 kg
+m = MathValue(500, -3, kg=1)  # 0.5 kg = 500 g
+h = MathValue(0.5, 0, m=1)  # 0.5 m
+g = MathValue(9.8, 0, m=1, s=-2)  # 9.8 m / s ** 2
+
+v = v(M, g, h, m)
+v = to_kmperhour(v)  # Converting into km/h
+
+print(round(v, 1))  # 9.2 km/h
+```
+
+**Finally, answer:** `9.2 km/h`
+
+_*In fact, all these tasks are more complicated than a couple of formulas. They require the expression of the formulas of their others, which was not shown in the examples. The examples show only the final formulas obtained during the expression_
+
+---
+
+# Explanation of the code:
 
 
 ## `units_system.py`:
