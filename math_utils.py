@@ -1,4 +1,6 @@
+rounding = True
 extended_accurate = True
+transl_units = True
 
 
 def gexp(num: float | int, expnum: bool = True, sepbase: int = 1) -> int | tuple[float, int]:
@@ -12,7 +14,10 @@ def gexp(num: float | int, expnum: bool = True, sepbase: int = 1) -> int | tuple
     return (num, exp) if expnum else exp
 
 
-def rndint(num: float | int, accuracy: int = 12) -> int | float:
+def rndint(num: float | int, accuracy: int = 15) -> int | float:
+    if not rounding:
+        return num
+
     if abs(int(num) - num) < 10 ** -accuracy:
         return int(num)
     return round(num, accuracy) if extended_accurate else num

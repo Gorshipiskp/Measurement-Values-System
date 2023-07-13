@@ -52,3 +52,10 @@ class Unit:
 
     def __neg__(self) -> "Unit":
         return Unit({unit: -exponent for unit, exponent in self.units.items()})
+
+    def __contains__(self, item):
+        for unit, val in item.items():
+            print(self.units[unit], val, val * -1)
+            if self.units[unit] < val:
+                return False
+        return True
