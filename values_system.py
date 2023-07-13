@@ -38,41 +38,55 @@ class MathValue(SupportsRound):
 
     def _gexp_(self):
         if autogrouping:
-            self.group()
+            self.ungroup()
+            self.group(do_gexp=False)
 
         gexp_ = gexp(self.rawcalc(), sepbase=base_exponent)
         self._content = (gexp_[0], gexp_[1] * base_exponent, Unit(self.content[2].units))
 
-    def group(self, do_gexp: bool = False):
+    def group(self, do_gexp: bool = True):
         units: dict[str, int] = self.content[2].units
 
         for sym, info in metrics_units.items():
             for sym_units in info['units']:
-                if all(unit in units for unit in sym_units):
-                    alll: groupby = groupby([units[unit] ^ val >= 0 for unit, val in sym_units.items()])
+                if not all(unit in units for unit in sym_units):
+                    return
 
-                    if not (next(alll, True) and not next(alll, False)):
-                        continue
+                alll: groupby = groupby([units[unit] ^ val >= 0 for unit, val in sym_units.items()])
 
-                    units_counts: list[int] = [int(units[unit] / val) for unit, val in sym_units.items()]
-                    min_unit: int = min(map(abs, units_counts))
+                if not (next(alll, True) and not next(alll, False)):
+                    continue
 
-                    if min_unit <= 0:
-                        continue
+                units_counts: list[int] = [int(units[unit] / val) for unit, val in sym_units.items()]
+                min_unit: int = min(map(abs, units_counts))
 
-                    sign: int = int(units_counts[0] / abs(units_counts[0]))
+                if min_unit <= 0:
+                    continue
 
-                    for unit, val in sym_units.items():
-                        if val * min_unit * sign == units[unit]:
-                            del units[unit]
-                        else:
-                            units[unit] -= val * min_unit * sign
+                sign: int = int(units_counts[0] / abs(units_counts[0]))
 
-                    units[sym] = min_unit * sign
+                for unit, val in sym_units.items():
+                    if val * min_unit * sign == units[unit]:
+                        del units[unit]
+                    else:
+                        units[unit] -= val * min_unit * sign
 
-                    if do_gexp:
-                        self._gexp_()
-                    break
+                units[sym] = min_unit * sign
+
+                if do_gexp:
+                    self._gexp_()
+                break
+
+    def ungroup(self):
+        units = self.content[2].units.copy()
+
+        for sym, val in units.items():
+            if sym not in metrics_units:
+                continue
+
+            for sym2, val2 in metrics_units[sym]["SI_units"].items():
+                self.content[2].units[sym2] = self.content[2].units.get(sym2, 0) + val2 * int(val / abs(val))
+            del self.content[2].units[sym]
 
     def rawcalc(self) -> int | float:
         return self.content[0] * 10 ** self.content[1]
@@ -84,7 +98,7 @@ class MathValue(SupportsRound):
         self._check_(other)
 
         val1: float | int = self.rawcalc()
-        val2: float | int = other.rawcalc() * (1 if add else -1)
+        val2: float | int = other.rawcalc() * int(add / abs(add))
 
         new_val, exp = gexp(val1 + val2, sepbase=base_exponent)
 
@@ -113,7 +127,7 @@ class MathValue(SupportsRound):
     def __sub__(self, other: "MathValue") -> "MathValue":
         return self._perform_operation_(other, False)
 
-    def __mul__(self, other) -> "MathValue":  # other: "MathValue" | int | float
+    def __mul__(self, other) -> "MathValue":  # other): "MathValue" | int | float
         if isinstance(other, int | float):
             return MathValue(self.content[0] * other, self.content[1], self.units_cl)
         else:
@@ -128,10 +142,10 @@ class MathValue(SupportsRound):
     def __truediv__(self, other) -> "MathValue":  # other: "MathValue" | int | float
         if isinstance(other, int | float):
             return MathValue(self.content[0] / other, self.content[1], self.units_cl)
-        else:
-            new_unit = self.content[2] / other.content[2]
-            new_val = self.content[0] / other.content[0]
-            new_exp = self.content[1] - other.content[1]
+
+        new_unit = self.content[2] / other.content[2]
+        new_val = self.content[0] / other.content[0]
+        new_exp = self.content[1] - other.content[1]
         return MathValue(new_val, new_exp, new_unit.units)
 
     def __rtruediv__(self, other: int | float) -> "MathValue":

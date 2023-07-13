@@ -46,6 +46,8 @@ class Tests:
         v = v(M, g, h, m)
         v = to_kmperhour(v)  # Converting into km/h
 
+        v.ungroup()
+
         return v  # ~9.2 km/h
 
     @staticmethod
