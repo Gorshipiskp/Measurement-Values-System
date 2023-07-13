@@ -44,33 +44,35 @@ class MathValue(SupportsRound):
         self._content = (gexp_[0], gexp_[1] * base_exponent, Unit(self.content[2].units))
 
     def group(self, do_gexp: bool = False):
-        units = self.content[2].units
+        units: dict[str, int] = self.content[2].units
 
         for sym, info in metrics_units.items():
-            if all(unit in units for unit in info['units']):
-                alll: groupby = groupby([units[unit] ^ val >= 0 for unit, val in info['units'].items()])
+            for sym_units in info['units']:
+                if all(unit in units for unit in sym_units):
+                    alll: groupby = groupby([units[unit] ^ val >= 0 for unit, val in sym_units.items()])
 
-                if not (next(alll, True) and not next(alll, False)):
-                    continue
+                    if not (next(alll, True) and not next(alll, False)):
+                        continue
 
-                units_counts: list[int] = [int(units[unit] / val) for unit, val in info['units'].items()]
-                min_unit: int = min(map(abs, units_counts))
+                    units_counts: list[int] = [int(units[unit] / val) for unit, val in sym_units.items()]
+                    min_unit: int = min(map(abs, units_counts))
 
-                if min_unit <= 0:
-                    continue
+                    if min_unit <= 0:
+                        continue
 
-                sign: int = int(units_counts[0] / abs(units_counts[0]))
+                    sign: int = int(units_counts[0] / abs(units_counts[0]))
 
-                for unit, val in info['units'].items():
-                    if val * min_unit * sign == units[unit]:
-                        del units[unit]
-                    else:
-                        units[unit] -= val * min_unit * sign
+                    for unit, val in sym_units.items():
+                        if val * min_unit * sign == units[unit]:
+                            del units[unit]
+                        else:
+                            units[unit] -= val * min_unit * sign
 
-                units[sym] = min_unit * sign
+                    units[sym] = min_unit * sign
 
-                if do_gexp:
-                    self._gexp_()
+                    if do_gexp:
+                        self._gexp_()
+                    break
 
     def rawcalc(self) -> int | float:
         return self.content[0] * 10 ** self.content[1]

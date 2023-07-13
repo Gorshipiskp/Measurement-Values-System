@@ -2,8 +2,6 @@
 
 A convenient library written in Python for performing arithmetic operations with numbers with units of measurement and exponents. This can be useful for engineers who need to work efficiently and conveniently with such numbers.
 
-#### _Information is current as of the 10th commit_
-
 ---
 
 # Usage examples:
@@ -57,7 +55,7 @@ The answer calculated manually matches the answer calculated by the program.
 
 #### Imagine that we have several problems in physics, and we need to solve them according to the given formulas.
 
-1. #### Determine the weight of a person weighing 70 kg in an elevator descending equidistant with an acceleration of 1 m / s2.
+1. #### Determine the weight of a person weighing 70 kg in an elevator descending equidistant with an acceleration of 1 m / s ** 2.
 
 ```python
 from values_system import MathValue
@@ -68,14 +66,14 @@ m = MathValue(7, 1, kg=1)  # 70 kg
 a = MathValue(1, 0, m=1, s=-2)  # 1 m / s ** 2
 g = MathValue(9.8, 0, m=1, s=-2)  # 9.8 m / s ** 2
 
-print(P(m, g, a))  # 7.56 * 10 ** 2 kg * m / s ** 2
+print(P(m, g, a))  # 7.56 * 10 ** 2 N
 ```
 
-The force is measured in Newtons (`N`). The program gave out `kg * m / s ** 2`. The fact is that Newton (`N`) is expressed as `kg * m / s ** 2`
+The force is measured in Newtons (`N`). The program gave out `kg * m / s ** 2` (if autogrouping is off). The fact is that Newton (`N`) is expressed as `kg * m / s ** 2`
 
 `N = kg * m / s ** 2`
 
-**Finally, answer:** `7.7 * 10 ** 2 N` (`770 N`)
+**Finally, answer:** `~ 7.7 * 10 ** 2 N` (`770 N`)
 
 2. #### The 2.8 kg rifle is suspended horizontally on two parallel threads. To what height from the initial position will the rifle be deflated when fired, if a bullet weighing 10 g flew out of it at a speed of 648 km/h?
 
@@ -95,7 +93,7 @@ v = to_mpersec(v)  # Converting into km/s
 print(round(h(m, v, g, M), 3))  # 0.021 m
 ```
 
-**Finally, answer:** `0.021 m`
+**Finally, answer:** `~ 0.021 m`
 
 3. #### A body weighing 500 g slides off a loose slide (wedge) weighing 1 kg. The slope angle of the slide varies and is zero at the base. The height of the slide is 0.5 m. Determine the speed of the body after slipping. To neglect friction.
 
@@ -116,7 +114,7 @@ v = to_kmperhour(v)  # Converting into km/h
 print(round(v, 1))  # 9.2 km/h
 ```
 
-**Finally, answer:** `9.2 km/h`
+**Finally, answer:** `~ 9.2 km/h`
 
 _*In fact, all these tasks are more complicated than a couple of formulas. They require the expression of the formulas of their others, which was not shown in the examples. The examples show only the final formulas obtained during the expression_
 
