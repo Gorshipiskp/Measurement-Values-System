@@ -1,4 +1,6 @@
 class Unit:
+    __slots__ = ('units',)
+
     def __init__(self, units: dict[str, int] = None, **units_: int):
         self.units = units_ if not units else units | units_
         self._clean_()

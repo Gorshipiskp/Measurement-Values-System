@@ -11,6 +11,8 @@ metrics_units = load(open("metrics_units.json", "r"))  # https://en.wikipedia.or
 
 
 class MathValue(SupportsRound):
+    __slots__ = ('_content', 'units_cl')
+
     def __init__(self, value: float | int, exp: float | int = 0, sc: dict | Unit = None, **sc_: int | float):
         if isinstance(value, MathValue):
             value = value.rawcalc()

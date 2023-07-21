@@ -1,4 +1,7 @@
+import timeit
+
 from values_system import MathValue
+from values_system import MathValueTest
 
 answers = {
     1: MathValue(7.56, 2, kg=1, m=1, s=-2),
