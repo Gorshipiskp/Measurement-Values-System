@@ -1,7 +1,7 @@
-import timeit
-
 from values_system import MathValue
-from values_system import MathValueTest
+
+
+timetests = True
 
 answers = {
     1: MathValue(7.56, 2, kg=1, m=1, s=-2),
@@ -65,3 +65,15 @@ class Tests:
 
 for exnum, answ in answers.items():
     print(f"TEST №{exnum} —", "SUCCESS" if Tests().__getattribute__(f"ex{exnum}")() == answ else "FAILED")
+
+
+#  Time tests
+
+if timetests:
+    import timeit
+
+    print()
+
+    for exnum, answ in answers.items():
+        time_ = timeit.timeit(Tests().__getattribute__(f"ex{exnum}"), number=10_000)
+        print(f"TEST №{exnum} — {time_}s")

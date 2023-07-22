@@ -1,5 +1,5 @@
 class Unit:
-    __slots__ = ('units',)
+    __slots__ = 'units',
 
     def __init__(self, units: dict[str, int] = None, **units_: int):
         self.units = units_ if not units else units | units_

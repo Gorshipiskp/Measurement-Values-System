@@ -1,8 +1,20 @@
 rounding = True
 extended_accurate = True
 transl_units = True
+caching = True
 
 
+if caching:
+    import functools
+
+
+def cache(func):
+    if caching:
+        return functools.cache(func)
+    return func
+
+
+@cache
 def gexp(num: float | int, expnum: bool = True, sepbase: int = 1) -> int | tuple[float, int]:
     exp: int = 0
 
@@ -14,6 +26,7 @@ def gexp(num: float | int, expnum: bool = True, sepbase: int = 1) -> int | tuple
     return (num, exp) if expnum else exp
 
 
+@cache
 def rndint(num: float | int, accuracy: int = 15) -> int | float:
     if not rounding:
         return num

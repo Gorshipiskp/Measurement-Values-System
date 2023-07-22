@@ -1,3 +1,4 @@
+import functools
 from units_system import Unit
 from math_utils import gexp, rndint
 from typing import SupportsRound
@@ -11,7 +12,7 @@ metrics_units = load(open("metrics_units.json", "r"))  # https://en.wikipedia.or
 
 
 class MathValue(SupportsRound):
-    __slots__ = ('_content', 'units_cl')
+    __slots__ = ('_value', '_exp', '_unit')
 
     def __init__(self, value: float | int, exp: float | int = 0, sc: dict | Unit = None, **sc_: int | float):
         if isinstance(value, MathValue):
@@ -22,20 +23,39 @@ class MathValue(SupportsRound):
         else:
             newunit: Unit = Unit(sc | sc_ if sc else sc_)
 
+        self._unit: Unit = newunit
+
         if exp == 0:
             value, exp = gexp(value, sepbase=base_exponent)
-            self.content: tuple[int | float, int, Unit] = (value, exp, newunit)
-        else:
-            self.content: tuple[int | float, int, Unit] = (value, exp, newunit)
-        self.units_cl = self.content[2].units
+
+        self._exp: int = exp
+        self.value: int | float = value
 
     @property
-    def content(self):
-        return self._content
+    def value(self):
+        return self._value
 
-    @content.setter
-    def content(self, value):
-        self._content = value
+    @value.setter
+    def value(self, value):
+        self._value = value
+        self._gexp_()
+
+    @property
+    def exp(self):
+        return self._exp
+
+    @exp.setter
+    def exp(self, value):
+        self._exp = value
+        self._gexp_()
+
+    @property
+    def unit(self):
+        return self._unit
+
+    @unit.setter
+    def unit(self, value):
+        self._unit = value
         self._gexp_()
 
     def _gexp_(self):
@@ -44,10 +64,13 @@ class MathValue(SupportsRound):
             self.group(do_gexp=False)
 
         gexp_ = gexp(self.rawcalc(), sepbase=base_exponent)
-        self._content = (gexp_[0], gexp_[1] * base_exponent, Unit(self.content[2].units))
+
+        self._value = gexp_[0]
+        self._exp = gexp_[1] * base_exponent
+        self._unit = Unit(self.unit.units)
 
     def group(self, do_gexp: bool = True):
-        units: dict[str, int] = self.content[2].units
+        units: dict[str, int] = self.unit.units
 
         for sym, info in metrics_units.items():
             for sym_units in info['units']:
@@ -80,48 +103,45 @@ class MathValue(SupportsRound):
                 break
 
     def ungroup(self):
-        units = self.content[2].units.copy()
+        units = self.unit.units.copy()
 
         for sym, val in units.items():
             if sym not in metrics_units:
                 continue
 
             for sym2, val2 in metrics_units[sym]["SI_units"].items():
-                self.content[2].units[sym2] = self.content[2].units.get(sym2, 0) + val2 * int(val / abs(val))
-            del self.content[2].units[sym]
+                self.unit.units[sym2] = self.unit.units.get(sym2, 0) + val2 * int(val / abs(val))
+            del self.unit.units[sym]
 
     def rawcalc(self) -> int | float:
-        return self.content[0] * 10 ** self.content[1]
+        return self.value * 10 ** self.exp
 
     def calc(self):
-        return MathValue(self.rawcalc(), 0, self.units_cl)
+        return MathValue(self.rawcalc(), 0, self.unit.units)
 
     def _perform_operation_(self, other: "MathValue", add: bool) -> "MathValue":
         self._check_(other)
 
-        val1: float | int = self.rawcalc()
-        val2: float | int = other.rawcalc() * int(add / abs(add))
+        new_val, exp = gexp(self.rawcalc() + other.rawcalc() * int(add / abs(add)), sepbase=base_exponent)
 
-        new_val, exp = gexp(val1 + val2, sepbase=base_exponent)
-
-        return MathValue(new_val, exp * base_exponent, self.units_cl)
+        return MathValue(new_val, exp * base_exponent, self.unit.units)
 
     def _check_(self, other: "MathValue") -> None:
-        assert self.content[2] == other.content[2], ("An error occurred during the operation - A mismatch of "
-                                                     "measurement units", 1, "MathValueTypeError")
+        assert self.unit == other.unit, ("An error occurred during the operation - A mismatch of "
+                                         "measurement units", 1, "MathValueTypeError")
 
     def __str__(self) -> str:
-        if self.content[1] == 0:
+        if self.exp == 0:
             expon = ''
-        elif self.content[1] == 1:
+        elif self.exp == 1:
             expon = f' * {10 ** base_exponent}'
         else:
-            expon = f" * {10 ** base_exponent} ** {rndint(self.content[1] / base_exponent)}"
+            expon = f" * {10 ** base_exponent} ** {rndint(self.exp / base_exponent)}"
 
-        return f"{rndint(self.content[0])}{expon}{f' {self.content[2]}' if not self.content[2] is None else ''}"
+        return f"{rndint(self.value)}{expon}{f' {self.unit}' if not self.unit is None else ''}"
 
     def __round__(self, n=None) -> "MathValue":
-        return MathValue(round(self.rawcalc(), n), 0, self.units_cl)
+        return MathValue(round(self.rawcalc(), n), 0, self.unit.units)
 
     def __add__(self, other: "MathValue") -> "MathValue":
         return self._perform_operation_(other, True)
@@ -131,49 +151,41 @@ class MathValue(SupportsRound):
 
     def __mul__(self, other) -> "MathValue":  # other): "MathValue" | int | float
         if isinstance(other, int | float):
-            return MathValue(self.content[0] * other, self.content[1], self.units_cl)
-        else:
-            new_unit = self.content[2] * other.content[2]
-            new_val = self.content[0] * other.content[0]
-            new_exp = self.content[1] + other.content[1]
-        return MathValue(new_val, new_exp, new_unit.units)
+            return MathValue(self.value * other, self.exp, self.unit.units)
+        return MathValue(self.value * other.value,
+                         self.exp + other.exp,
+                         (self.unit * other.unit).units)
 
     def __rmul__(self, other: int | float) -> "MathValue":
-        return MathValue(self.content[0] * other, self.content[1], self.units_cl)
+        return MathValue(self.value * other, self.exp, self.unit.units)
 
     def __truediv__(self, other) -> "MathValue":  # other: "MathValue" | int | float
         if isinstance(other, int | float):
-            return MathValue(self.content[0] / other, self.content[1], self.units_cl)
-
-        new_unit = self.content[2] / other.content[2]
-        new_val = self.content[0] / other.content[0]
-        new_exp = self.content[1] - other.content[1]
-        return MathValue(new_val, new_exp, new_unit.units)
+            return MathValue(self.value / other, self.exp, self.unit.units)
+        return MathValue(self.value / other.value,
+                         self.exp - other.exp,
+                         (self.unit / other.unit).units)
 
     def __rtruediv__(self, other: int | float) -> "MathValue":
-        return MathValue(other / self.content[0], self.content[1], self.units_cl)
+        return MathValue(other / self.value, self.exp, self.unit.units)
 
     def __pow__(self, exponent) -> "MathValue":  # exponent: "MathValue" | int | float
         assert isinstance(exponent, int | float), ("The exponent for exponentiation of Math Value must be a number",
                                                    2, "ExponentTypeError")
-
-        new_val = self.content[0] ** exponent
-        new_exp = self.content[1] * exponent
-        new_unit = self.content[2] ** exponent
-        return MathValue(new_val, new_exp, new_unit.units)
+        return MathValue(self.value ** exponent, self.exp * exponent, (self.unit ** exponent).units)
 
     def __neg__(self) -> "MathValue":
-        return MathValue(-self.content[0], self.content[1], self.units_cl)
+        return MathValue(-self.value, self.exp, self.unit.units)
 
     def __eq__(self, other: "MathValue") -> bool:
-        return all((self.content[0] == other.content[0],
-                    self.content[1] == other.content[1],
-                    self.content[2] == other.content[2]))
+        return all((self.value == other.value,
+                    self.exp == other.exp,
+                    self.unit == other.unit))
 
     def __ne__(self, other: "MathValue") -> bool:
-        return any((self.content[0] != other.content[0],
-                    self.content[1] != other.content[1],
-                    self.content[2] != other.content[2]))
+        return any((self.value != other.value,
+                    self.exp != other.exp,
+                    self.unit != other.unit))
 
     def __lt__(self, other: "MathValue") -> bool:
         self._check_(other)
